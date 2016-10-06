@@ -21,10 +21,15 @@
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.FileSystems;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.Scanner;
+import java.util.StringTokenizer;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
@@ -106,6 +111,7 @@ public class SearchFiles {
       }
 
       String line = queryString != null ? queryString : in.readLine();
+      
 
       if (line == null || line.length() == -1) {
         break;
@@ -128,7 +134,7 @@ public class SearchFiles {
         System.out.println("Time: "+(end.getTime()-start.getTime())+"ms");
       }
 
-      doPagingSearch(in, searcher, query, hitsPerPage, raw, queries == null && queryString == null);
+      doPagingSearch(in, searcher, query, hitsPerPage, raw, queries == null && queryString == null, line );
 
       if (queryString != null) {
         break;
@@ -145,16 +151,17 @@ public class SearchFiles {
    * When the query is executed for the first time, then only enough results are collected
    * to fill 5 result pages. If the user wants to page beyond this limit, then the query
    * is executed another time and all hits are collected.
+ * @throws Exception 
    * 
    */
   public static void doPagingSearch(BufferedReader in, IndexSearcher searcher, Query query, 
-                                     int hitsPerPage, boolean raw, boolean interactive) throws IOException {
+                                     int hitsPerPage, boolean raw, boolean interactive, String line1) throws Exception {
  
     // Collect enough docs to show 5 pages
     TopDocs results = searcher.search(query, 5 * hitsPerPage);
     ScoreDoc[] hits = results.scoreDocs;
-    
     int numTotalHits = results.totalHits;
+    System.out.println("this is the quesry " + line1);
     System.out.println(numTotalHits + " total matching documents");
 
     int start = 0;
@@ -183,7 +190,8 @@ public class SearchFiles {
         Document doc = searcher.doc(hits[i].doc);
         String path = doc.get("path");
         if (path != null) {
-          System.out.println((i+1) + ". " + path);
+         System.out.println((i+1) + ". " + path + tokenisingTheUserInput(line1,path));
+        	      	
           String title = doc.get("title");
           if (title != null) {
             System.out.println("   Title: " + doc.get("title"));
@@ -209,6 +217,7 @@ public class SearchFiles {
             System.out.print("(n)ext page, ");
           }
           System.out.println("(q)uit or enter number to jump to a page.");
+          
           
           String line = in.readLine();
           if (line.length() == 0 || line.charAt(0)=='q') {
@@ -238,4 +247,62 @@ public class SearchFiles {
       }
     }
   }
+  
+
+public static String tokenisingTheUserInput (String query, String path) throws Exception {
+		
+	StringTokenizer defaultTokenizer = new StringTokenizer(query);
+	int size = defaultTokenizer.countTokens();
+	
+	//create array and then set the values
+	  String[] tokenOfInput = new String[size];
+	  for (int t = 0; t < tokenOfInput.length; t++){
+			tokenOfInput[t] = defaultTokenizer.nextToken();					
+		}
+
+	  
+	  //creating 2d array and then set values
+	  String[][] table = new String[size][2];
+	  for(int p=0; p<table.length; p++) {
+	        for(int j=0; j<table[p].length; j++) {
+	        	table[p][j] = "0";	  
+	        }
+	    }
+	  
+	  
+	  for (int i = 0; i<table.length; i++){
+
+		    	searchingThroughDocForWordHits(tokenOfInput[i], path, size, table, i);
+
+		}	 
+	  
+	 // System.out.print("The ammount of times the word appear in the document for the document above " + (Arrays.deepToString(table)));
+	  String wordHits = Arrays.deepToString(table);
+	  return wordHits;
+  }
+  
+  private static String[][] searchingThroughDocForWordHits(String queryWord, String path, int size, String[][] table, int i) throws FileNotFoundException {
+	  
+
+	  Scanner in = new Scanner(new File(path));
+
+		    while (in.hasNext()) {
+		        String s = in.next(); //get the next token in the file
+		        if (queryWord.equals(s.toString())) {
+
+		        	table[i][0] = queryWord;
+		        	int count = Integer.parseInt(table[i][1]);
+
+		        	count++;
+		        	table[i][1] = String.valueOf(count);	
+
+		        }        
+		    }
+
+	  return table;
+ 
+	
+}
+
+
 }
