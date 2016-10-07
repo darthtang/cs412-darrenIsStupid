@@ -1,4 +1,5 @@
 import java.awt.EventQueue;
+import java.io.File;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
@@ -9,6 +10,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
@@ -101,19 +103,11 @@ public class GUI {
 		simpleTab.add(searchTextField);
 		searchTextField.setColumns(10);
 		
-		JButton btnSearch = new JButton("Search");
-		btnSearch.addActionListener(e -> {
-			// TODO: add in the code to search the indexed files.
-			// searchTextField contains the query
-		});
-		btnSearch.setBounds(503, 6, 117, 29);
-		simpleTab.add(btnSearch);
-		
-		JLabel lblQuery = new JLabel("Searched for \"text here\"");
+		JLabel lblQuery = new JLabel("Searched for: ");
 		lblQuery.setBounds(6, 33, 285, 16);
 		simpleTab.add(lblQuery);
 		
-		JLabel lblResultsNumber = new JLabel("\"Number\" results in \"time\" ms");
+		JLabel lblResultsNumber = new JLabel("0 results in 0 seconds");
 		lblResultsNumber.setBounds(6, 56, 285, 16);
 		simpleTab.add(lblResultsNumber);
 		
@@ -124,11 +118,6 @@ public class GUI {
 		JList<Object> resultsList = new JList<>();
 		resultsList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		DefaultListModel<Object> dlm = new DefaultListModel<>();
-		dlm.addElement("Sample List Item 1");
-		dlm.addElement("Sample List Item 2");
-		dlm.addElement("Sample List Item 3");
-		dlm.addElement("Sample List Item 4");
-		dlm.addElement("Sample List Item 5");
 		resultsList.setModel(dlm);
 		
 		scrollPane.setViewportView(resultsList);
@@ -136,6 +125,47 @@ public class GUI {
 		JLabel lblHitsInResult = new JLabel("\"Number\" of hits in \"List Selection\"");
 		lblHitsInResult.setBounds(304, 33, 316, 16);
 		simpleTab.add(lblHitsInResult);
+		
+		JProgressBar searchProgressBar = new JProgressBar();
+		searchProgressBar.setStringPainted(true);
+		searchProgressBar.setMinimum(0);
+		searchProgressBar.setBounds(700, 12, 187, 20);
+		simpleTab.add(searchProgressBar);
+		
+		JButton btnSearch = new JButton("Search");
+		btnSearch.addActionListener(e -> {
+			dlm.removeAllElements();
+			Thread t = new Thread() {
+				@Override
+				public void run() {
+					long startTime = System.currentTimeMillis();
+					File root = new File("wsj-1990"); // TODO: remove hard coded value
+					String query = searchTextField.getText().trim();
+					lblQuery.setText("Searched for: " + query); // update the searched for label
+					File[] files = root.listFiles();
+					searchProgressBar.setMaximum(files.length);
+					for (int i = 0; i < files.length; i++) {
+						try {
+							dlm.addElement(SearchFiles.tokenisingTheUserInput(query, files[i].getPath()));
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+						searchProgressBar.setValue(i); // update the progress bar after every document
+					}
+					long endTime = System.currentTimeMillis();
+					searchProgressBar.setValue(searchProgressBar.getMaximum()); // set progress bar to complete
+					lblResultsNumber.setText(dlm.size() + " results in " + ((endTime - startTime)/1000) + " seconds"); // update the number of hits label
+					
+				}
+			};
+			t.start(); // start the thread to search the files
+		});
+		btnSearch.setBounds(503, 6, 117, 29);
+		simpleTab.add(btnSearch);
+		
+		JLabel lblSearchProgress = new JLabel("Progress:");
+		lblSearchProgress.setBounds(632, 11, 68, 16);
+		simpleTab.add(lblSearchProgress);
 		
 		JPanel advancedTab = new JPanel();
 		tabbedPane.addTab("Advanced Search", null, advancedTab, null);

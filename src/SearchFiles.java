@@ -22,10 +22,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.FileSystems;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Scanner;
@@ -42,7 +40,6 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.FSDirectory;
-import org.apache.lucene.util.Version;
 
 /** Simple command-line based search demo. */
 public class SearchFiles {
@@ -257,7 +254,7 @@ public static String tokenisingTheUserInput (String query, String path) throws E
 	//create array and then set the values
 	  String[] tokenOfInput = new String[size];
 	  for (int t = 0; t < tokenOfInput.length; t++){
-			tokenOfInput[t] = defaultTokenizer.nextToken();					
+			tokenOfInput[t] = defaultTokenizer.nextToken();			
 		}
 
 	  
