@@ -1,5 +1,6 @@
 import java.awt.EventQueue;
 import java.io.File;
+import java.io.IOException;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
@@ -29,8 +30,11 @@ public class GUI {
 
 	/**
 	 * Launch the application.
+	 * @throws IOException 
 	 */
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
+		SearchFiles.initialiseArrays(); // initialise stop word support
+		
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
