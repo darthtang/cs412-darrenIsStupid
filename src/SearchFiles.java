@@ -22,8 +22,11 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.FileSystems;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Scanner;
@@ -43,11 +46,35 @@ import org.apache.lucene.store.FSDirectory;
 
 /** Simple command-line based search demo. */
 public class SearchFiles {
-
+	
+	private static ArrayList<String> stopWords;
+	private static ArrayList<String> userAddedstopWords;
+	
   private SearchFiles() {}
 
   /** Simple command-line based search demo. */
   public static void main(String[] args) throws Exception {
+	  
+	  userAddedstopWords = new ArrayList<String>();
+	 
+	  BufferedReader br = null;
+		stopWords = new ArrayList<String>();
+		String sCurrentLine = null;
+		Boolean compared = false;
+
+		br = new BufferedReader(new FileReader("ListOfStopWords.txt"));
+		stopWords.add(sCurrentLine);
+
+		while ((sCurrentLine = br.readLine()) != null) {
+
+			stopWords.add(sCurrentLine);
+
+		}
+		
+		
+		//System.out.println(Arrays.toString(stopWords.toArray()));
+	  
+	  
     String usage =
       "Usage:\tjava org.apache.lucene.demo.SearchFiles [-index dir] [-field f] [-repeat n] [-queries file] [-query string] [-raw] [-paging hitsPerPage]\n\nSee http://lucene.apache.org/java/4_0/demo.html for details.";
     if (args.length > 0 && ("-h".equals(args[0]) || "-help".equals(args[0]))) {
@@ -101,6 +128,9 @@ public class SearchFiles {
     } else {
       in = new BufferedReader(new InputStreamReader(System.in, "UTF-8"));
     }
+    
+    addingStopWords();
+    
     QueryParser parser = new QueryParser(field, analyzer);
     while (true) {
       if (queries == null && queryString == null) {                        // prompt the user
@@ -131,7 +161,7 @@ public class SearchFiles {
         System.out.println("Time: "+(end.getTime()-start.getTime())+"ms");
       }
 
-      doPagingSearch(in, searcher, query, hitsPerPage, raw, queries == null && queryString == null, line );
+      doPagingSearch(in, searcher, query, hitsPerPage, raw, queries == null && queryString == null, line);
 
       if (queryString != null) {
         break;
@@ -140,7 +170,7 @@ public class SearchFiles {
     reader.close();
   }
 
-  /**
+/**
    * This demonstrates a typical paging search scenario, where the search engine presents 
    * pages of size n to the user. The user can then go to the next page if interested in
    * the next hits.
@@ -151,6 +181,27 @@ public class SearchFiles {
  * @throws Exception 
    * 
    */
+  public static void addingStopWords(){
+	  
+	  Scanner scanning = new Scanner(System.in);
+		String userInput;
+	    
+		System.out.println("Would you like to enter adding stop words mode? Y/N");
+		userInput = scanning.nextLine();
+		String stopWordsWanted = null;
+	    
+		if ((userInput.equals("Y")) || (userInput.equals("y"))){
+			System.out.println("start typing the strings seperated by a space");
+			stopWordsWanted = scanning.nextLine();
+			for(String word : stopWordsWanted.split(" ")) {	
+					userAddedstopWords.add(word);		
+				}
+			}else{
+				System.out.println("you did not enter stop words mode");
+			}
+	  
+  }
+  
   public static void doPagingSearch(BufferedReader in, IndexSearcher searcher, Query query, 
                                      int hitsPerPage, boolean raw, boolean interactive, String line1) throws Exception {
  
@@ -247,8 +298,26 @@ public class SearchFiles {
   
 
 public static String tokenisingTheUserInput (String query, String path) throws Exception {
-		
-	StringTokenizer defaultTokenizer = new StringTokenizer(query);
+	
+	ArrayList<String> wordArrayList = new ArrayList<String>();
+	for(String word : query.split(" ")) {
+		if(!stopWords.contains(word)){
+			if(!userAddedstopWords.contains(word)){
+				wordArrayList.add(word);
+			}
+		}
+	}
+	
+	
+	
+	String trueQuery = "";
+	for (int i = 0; i < wordArrayList.size(); i++) {
+	    trueQuery += wordArrayList.get(i) + " ";
+	}
+	
+	//System.out.println("true query = " + trueQuery);
+	
+	StringTokenizer defaultTokenizer = new StringTokenizer(trueQuery);
 	int size = defaultTokenizer.countTokens();
 	
 	//create array and then set the values
@@ -280,7 +349,6 @@ public static String tokenisingTheUserInput (String query, String path) throws E
   
   private static String[][] searchingThroughDocForWordHits(String queryWord, String path, int size, String[][] table, int i) throws FileNotFoundException {
 	  
-
 	  Scanner in = new Scanner(new File(path));
 
 		    while (in.hasNext()) {
@@ -301,5 +369,15 @@ public static String tokenisingTheUserInput (String query, String path) throws E
 	
 }
 
+private static boolean doesNotHitAStopWord(String queryWord) {
+	// TODO Auto-generated method stub
+	  for (int i = 0; i < stopWords.size(); i++){
+		if(queryWord.equals(stopWords.get(i)));
+		System.out.println("you hit a stop word dude---" + queryWord + "" + stopWords.get(i));
+		  return false;
+		}
+	
+	return true;
+}
 
 }
