@@ -129,7 +129,6 @@ public class SearchFiles {
       in = new BufferedReader(new InputStreamReader(System.in, "UTF-8"));
     }
     
-    addingStopWords();
     
     QueryParser parser = new QueryParser(field, analyzer);
     while (true) {
@@ -181,26 +180,13 @@ public class SearchFiles {
  * @throws Exception 
    * 
    */
-  public static void addingStopWords(){
-	  
-	  Scanner scanning = new Scanner(System.in);
-		String userInput;
-	    
-		System.out.println("Would you like to enter adding stop words mode? Y/N");
-		userInput = scanning.nextLine();
-		String stopWordsWanted = null;
-	    
-		if ((userInput.equals("Y")) || (userInput.equals("y"))){
-			System.out.println("start typing the strings seperated by a space");
-			stopWordsWanted = scanning.nextLine();
-			for(String word : stopWordsWanted.split(" ")) {	
+  public static void addingStopWords(String input){
+
+			for(String word : input.split(" ")) {	
 					userAddedstopWords.add(word);		
 				}
-			}else{
-				System.out.println("you did not enter stop words mode");
 			}
-	  
-  }
+ 
   
   public static void doPagingSearch(BufferedReader in, IndexSearcher searcher, Query query, 
                                      int hitsPerPage, boolean raw, boolean interactive, String line1) throws Exception {
