@@ -248,7 +248,41 @@ public class GUI {
 		JButton btnAdvancedSearch = new JButton("Search");
 		btnAdvancedSearch.setBounds(0, 168, 117, 29);
 		btnAdvancedSearch.addActionListener(e -> {
-			// TODO: add in the logic for an advanced search
+			dlm.removeAllElements();
+			Thread t = new Thread() {
+				@Override
+				public void run() {
+					// all of these words
+					String allWords = allWordsTextfield.getText();
+					
+					// exact words or phrase
+					String exactWords = exactWordsTextfield.getText();
+					
+					// any of these words
+					String anyWords = anyWordsTextfield.getText();
+					
+					// none of these words
+					String noneWords = noneWordsTextfield.getText();
+					
+					// numbers ranging from _ to _ 
+					// numbersFromTextField.getText(), numbersToTextField.getText()
+					int numFrom = 0;
+					int numTo = 0;
+					boolean doSearch = true;
+					try {
+						numFrom = Integer.parseInt(numbersFromTextfield.getText());
+						numTo = Integer.parseInt(numbersToTextfield.getText());
+					} catch (NumberFormatException e) {
+						// TODO: throw popup telling the user theyre a fud.
+						doSearch = false;
+					}
+					
+					if (doSearch) {
+						SearchFiles.doAdvancedSearch(allWords, exactWords, anyWords, noneWords, numFrom, numTo);
+					}
+				}
+			};
+			t.start(); // start the thread to search the files
 		});
 		advancedTab.add(btnAdvancedSearch);
 		// End of advanced tab setup

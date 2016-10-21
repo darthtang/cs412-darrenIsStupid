@@ -23,7 +23,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.FileSystems;
 import java.util.ArrayList;
@@ -353,9 +352,9 @@ public static String tokenisingTheUserInput (String query, String path) throws E
 	  return table;
  
 	
-}
+  }
 
-private static boolean doesNotHitAStopWord(String queryWord) {
+  private static boolean doesNotHitAStopWord(String queryWord) {
 	// TODO Auto-generated method stub
 	  for (int i = 0; i < stopWords.size(); i++){
 		if(queryWord.equals(stopWords.get(i)));
@@ -364,6 +363,12 @@ private static boolean doesNotHitAStopWord(String queryWord) {
 		}
 	
 	return true;
-}
+  }
+
+	public static String doAdvancedSearch(String allWords, String exactWords, String anyWords, String noneWords, int fromRange, int toRange) {
+		return "";
+	}
+
+
 
 }
