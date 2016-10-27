@@ -41,6 +41,8 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.FSDirectory;
+import org.tartarus.snowball.ext.PorterStemmer;
+
 
 /** Simple command-line based search demo. */
 public class SearchFiles {
@@ -55,7 +57,7 @@ public class SearchFiles {
 	public static void main(String[] args) throws Exception {
 		
 		initialiseArrays();
-
+		
 		String usage = "Usage:\tjava org.apache.lucene.demo.SearchFiles [-index dir] [-field f] [-repeat n] [-queries file] [-query string] [-raw] [-paging hitsPerPage]\n\nSee http://lucene.apache.org/java/4_0/demo.html for details.";
 		if (args.length > 0 && ("-h".equals(args[0]) || "-help".equals(args[0]))) {
 			System.out.println(usage);
@@ -331,6 +333,12 @@ public class SearchFiles {
 			int i) throws FileNotFoundException {
 
 		Scanner in = new Scanner(new File(path));
+		
+		PorterStemmer stemmer = new PorterStemmer();
+		stemmer.setCurrent(queryWord);
+		stemmer.stem();
+		queryWord = stemmer.getCurrent();
+		System.out.println("this is resulting from queryWord = " + queryWord);
 
 		while (in.hasNext()) {
 			String s = in.next(); // get the next token in the file
