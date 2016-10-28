@@ -198,9 +198,10 @@ public class IndexFiles {
 
           if (writer.getConfig().getOpenMode() == OpenMode.CREATE) {
               // New index, so we just add the document (no old document can be there):
-              //System.out.println("adding " + file); // TODO: make this print the GUI
         	  if (dlm != null) {
         		  dlm.addElement("Adding: " + file);
+        	  } else {
+        		  System.out.println("Adding: " + file); // retain support for the console
         	  }
               writer.addDocument(doc);
           } else {
@@ -263,9 +264,10 @@ public class IndexFiles {
 	      writer.close();
 
 	      Date end = new Date();
-	      //System.out.println(end.getTime() - start.getTime() + " total milliseconds"); // TODO: make this print to the GUI
 	      if (dlm != null) {
 		      dlm.addElement(end.getTime() - start.getTime() + " total milliseconds");
+	      } else {
+	    	  System.out.println(end.getTime() - start.getTime() + " total milliseconds"); // retain support for the console
 	      }
 	      progress.setValue(progress.getMaximum()); // update the progress bar to 100%
 

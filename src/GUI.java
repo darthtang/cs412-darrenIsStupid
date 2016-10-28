@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -166,6 +167,10 @@ public class GUI {
 		simpleTab.add(searchTextField);
 		searchTextField.setColumns(10);
 		
+		JCheckBox chckbxRemoveRepeatingWordsSimple = new JCheckBox("Remove repeating words?");
+		chckbxRemoveRepeatingWordsSimple.setBounds(6, 111, 677, 23);
+		simpleTab.add(chckbxRemoveRepeatingWordsSimple);
+		
 		btnSimpleSearch = new JButton("Search");
 		btnSimpleSearch.addActionListener(e -> {
 			dlm.removeAllElements();
@@ -181,7 +186,7 @@ public class GUI {
 					progressBar.setMaximum(files.length);
 					for (int i = 0; i < files.length; i++) {
 						try {
-							dlm.addElement(SearchFiles.tokenisingTheUserInput(query, files[i].getPath()));
+							dlm.addElement(SearchFiles.tokenisingTheUserInput(query, files[i].getPath(), chckbxRemoveRepeatingWordsSimple.isSelected()));
 						} catch (Exception e) {
 							e.printStackTrace();
 						}
@@ -196,6 +201,7 @@ public class GUI {
 		});
 		btnSimpleSearch.setBounds(713, 80, 174, 29);
 		simpleTab.add(btnSimpleSearch);
+		
 		// End of simple tab setup
 		
 		// Start of advanced tab setup
@@ -261,6 +267,10 @@ public class GUI {
 		advancedTab.add(numbersToTextfield);
 		numbersToTextfield.setColumns(10);
 		
+		JCheckBox chckbxRemoveRepeatingWordsAdv = new JCheckBox("Remove repeating words?");
+		chckbxRemoveRepeatingWordsAdv.setBounds(129, 168, 457, 23);
+		advancedTab.add(chckbxRemoveRepeatingWordsAdv);
+		
 		btnAdvancedSearch = new JButton("Search");
 		btnAdvancedSearch.setBounds(0, 168, 117, 29);
 		btnAdvancedSearch.addActionListener(e -> {
@@ -293,13 +303,15 @@ public class GUI {
 					}
 					
 					if (doSearch) {
-						SearchFiles.doAdvancedSearch(allWords, exactWords, anyWords, noneWords, numFrom, numTo);
+						SearchFiles.doAdvancedSearch(allWords, exactWords, anyWords, noneWords, numFrom, numTo, chckbxRemoveRepeatingWordsAdv.isSelected());
 					}
 				}
 			};
 			t.start(); // start the thread to search the files
 		});
 		advancedTab.add(btnAdvancedSearch);
+		
+		
 		// End of advanced tab setup
 
 		// Start of preferences tab setup

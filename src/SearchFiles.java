@@ -223,7 +223,7 @@ public class SearchFiles {
 				Document doc = searcher.doc(hits[i].doc);
 				String path = doc.get("path");
 				if (path != null) {
-					System.out.println((i + 1) + ". " + path + tokenisingTheUserInput(line1, path));
+					System.out.println((i + 1) + ". " + path + tokenisingTheUserInput(line1, path, false)); // default not to remove duplicates
 
 					String title = doc.get("title");
 					if (title != null) {
@@ -281,7 +281,7 @@ public class SearchFiles {
 		}
 	}
 
-	public static String tokenisingTheUserInput(String query, String path) throws Exception {
+	public static String tokenisingTheUserInput(String query, String path, boolean removeDuplicates) throws Exception {
 
 		ArrayList<String> wordArrayList = new ArrayList<String>();
 		for (String word : query.split(" ")) {
@@ -324,7 +324,9 @@ public class SearchFiles {
 
 		// System.out.print("The ammount of times the word appear in the
 		// document for the document above " + (Arrays.deepToString(table)));
-		cleanTheArray(table);
+		if (removeDuplicates) {
+			cleanTheArray(table);
+		}
 		String wordHits = Arrays.deepToString(table);
 		return wordHits;
 	}
@@ -397,7 +399,7 @@ public class SearchFiles {
 	}
 
 	public static String doAdvancedSearch(String allWords, String exactWords, String anyWords, String noneWords,
-			int fromRange, int toRange) {
+			int fromRange, int toRange, boolean removeDuplicates) {
 		return "";
 	}
 
