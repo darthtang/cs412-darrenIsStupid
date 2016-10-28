@@ -292,12 +292,13 @@ public class SearchFiles {
 			}
 		}
 
+		
 		String trueQuery = "";
 		for (int i = 0; i < wordArrayList.size(); i++) {
 			trueQuery += wordArrayList.get(i) + " ";
 		}
 
-		// System.out.println("true query = " + trueQuery);
+	    //System.out.println("true query = " + trueQuery);
 
 		StringTokenizer defaultTokenizer = new StringTokenizer(trueQuery);
 		int size = defaultTokenizer.countTokens();
@@ -317,11 +318,8 @@ public class SearchFiles {
 		}
 
 		for (int i = 0; i < table.length; i++) {
-
 			searchingThroughDocForWordHits(tokenOfInput[i], path, size, table, i);
-
 		}
-
 		// System.out.print("The ammount of times the word appear in the
 		// document for the document above " + (Arrays.deepToString(table)));
 		if (removeDuplicates) {
@@ -359,14 +357,15 @@ public class SearchFiles {
 	
 	private static String[][] searchingThroughDocForWordHits(String queryWord, String path, int size, String[][] table,
 			int i) throws FileNotFoundException {
-
+		
 		Scanner in = new Scanner(new File(path));
 		
 		PorterStemmer stemmer = new PorterStemmer();
 		stemmer.setCurrent(queryWord);
 		stemmer.stem();
-		queryWord = stemmer.getCurrent();
-		//System.out.println("this is resulting from queryWord = " + queryWord);
+		//queryWord = stemmer.getCurrent();
+		
+		//System.out.println("this is resulting from queryWord = " + queryWord); // TODO: this needs fixed, some words ending in 'y' get screwed up. (funny -> funni)
 
 		while (in.hasNext()) {
 			String s = in.next(); // get the next token in the file
@@ -382,6 +381,8 @@ public class SearchFiles {
 
 			}
 		}
+		
+		in.close(); // close the scanner
 
 		return table;
 

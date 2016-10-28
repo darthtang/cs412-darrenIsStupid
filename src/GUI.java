@@ -12,6 +12,7 @@ import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
@@ -111,12 +112,14 @@ public class GUI {
 		JMenuItem mntmUserGuide = new JMenuItem("User Guide");
 		mntmUserGuide.addActionListener(e -> {
 			// TODO: add in the code to show a popup detailing the user guide
+			JOptionPane.showMessageDialog(null, getUserGuide(), "User Guide", JOptionPane.INFORMATION_MESSAGE);
 		});
 		mnHelp.add(mntmUserGuide);
 		
 		JMenuItem mntmAbout = new JMenuItem("About");
 		mntmAbout.addActionListener(e -> {
 			// TODO: add in the code to show a popup detailing the authors of the program
+			JOptionPane.showMessageDialog(null, getAbout(), "About", JOptionPane.INFORMATION_MESSAGE);
 		});
 		mnHelp.add(mntmAbout);
 		// End of Menu Items
@@ -298,7 +301,8 @@ public class GUI {
 						numFrom = Integer.parseInt(numbersFromTextfield.getText());
 						numTo = Integer.parseInt(numbersToTextfield.getText());
 					} catch (NumberFormatException e) {
-						// TODO: throw popup telling the user theyre a fud.
+						// Throw a popup alerting the user they input bad values
+						JOptionPane.showMessageDialog(null, "Enter numbers only in: \n[Numbers ranging from.. to...] fields", "Error", JOptionPane.ERROR_MESSAGE);
 						doSearch = false;
 					}
 					
@@ -323,5 +327,17 @@ public class GUI {
 		lblTempPrefTabLabel.setBounds(365, 70, 176, 25);
 		preferencesTab.add(lblTempPrefTabLabel);
 		// End of preferences tab setup
+	}
+	
+	private String getUserGuide() {
+		return "";
+	}
+	
+	private String getAbout() {
+		return "Authors: "
+				+ "\n Kieran Sharpe"
+				+ "\n Darren Tang"
+				+ "\n Omer Shah"
+				+ "\n Dave Stirrat";
 	}
 }
