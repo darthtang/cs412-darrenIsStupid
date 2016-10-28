@@ -342,13 +342,15 @@ public class SearchFiles {
 
 		while (in.hasNext()) {
 			String s = in.next(); // get the next token in the file
+			table[i][0] = queryWord;
 			if (queryWord.equals(s.toString())) {
 
-				table[i][0] = queryWord;
+				//table[i][0] = queryWord;
 				int count = Integer.parseInt(table[i][1]);
 
 				count++;
 				table[i][1] = String.valueOf(count);
+				
 
 			}
 		}
