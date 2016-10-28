@@ -43,7 +43,6 @@ import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.FSDirectory;
 import org.tartarus.snowball.ext.PorterStemmer;
 
-
 /** Simple command-line based search demo. */
 public class SearchFiles {
 
@@ -325,10 +324,37 @@ public class SearchFiles {
 
 		// System.out.print("The ammount of times the word appear in the
 		// document for the document above " + (Arrays.deepToString(table)));
+		cleanTheArray(table);
 		String wordHits = Arrays.deepToString(table);
 		return wordHits;
 	}
 
+	public static String[][] cleanTheArray(String[][] table){
+		
+		for (int p = 0; p < table.length; p++) {
+			int countOfDuplicate = 0;
+			for (int j = 0; j < table.length; j++) {
+
+				String stringAgainstArray = table[p][0];
+				String stringFromArray = table[j][0];
+
+				
+				if(stringAgainstArray.equals(stringFromArray)){
+
+					countOfDuplicate++;
+					if (countOfDuplicate == 2){
+						table[p][0] = "null";
+						table[p][1] = "0";
+					}
+					
+					}
+				}
+				
+			}
+		return table;
+		}
+
+	
 	private static String[][] searchingThroughDocForWordHits(String queryWord, String path, int size, String[][] table,
 			int i) throws FileNotFoundException {
 
@@ -338,7 +364,7 @@ public class SearchFiles {
 		stemmer.setCurrent(queryWord);
 		stemmer.stem();
 		queryWord = stemmer.getCurrent();
-		System.out.println("this is resulting from queryWord = " + queryWord);
+		//System.out.println("this is resulting from queryWord = " + queryWord);
 
 		while (in.hasNext()) {
 			String s = in.next(); // get the next token in the file
