@@ -2,9 +2,8 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="//studenthome.cis.strath.ac.uk/homes/system/Windows/My Documents/CS412/lucene-6.2.1/queryparser/lucene-queryparser-6.2.1.jar"/>
-	<classpathentry kind="lib" path="//studenthome.cis.strath.ac.uk/homes/system/Windows/My Documents/CS412/lucene-6.2.1/core/lucene-core-6.2.1.jar"/>
-	<classpathentry kind="lib" path="//studenthome.cis.strath.ac.uk/homes/system/Windows/My Documents/CS412/lucene-6.2.1/analysis/common/lucene-analyzers-common-6.2.1.jar"/>
-	<classpathentry kind="lib" path="//studenthome.cis.strath.ac.uk/homes/system/Windows/My Documents/CS412/lucene-6.2.1/analysis/stempel/lucene-analyzers-stempel-6.2.1.jar"/>
+	<classpathentry kind="lib" path="/Users/kieransharpe/Projects/lucene-6.2.1/core/lucene-core-6.2.1.jar"/>
+	<classpathentry kind="lib" path="/Users/kieransharpe/Projects/lucene-6.2.1/queryparser/lucene-queryparser-6.2.1.jar"/>
+	<classpathentry kind="lib" path="/Users/kieransharpe/Projects/lucene-6.2.1/analysis/common/lucene-analyzers-common-6.2.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

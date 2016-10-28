@@ -27,6 +27,11 @@ public class GUI {
 	private JTextField noneWordsTextfield;
 	private JTextField numbersFromTextfield;
 	private JTextField numbersToTextfield;
+	private JProgressBar progressBar;
+	private JButton btnSimpleSearch, btnAdvancedSearch;
+	private JList<Object> list;
+	private DefaultListModel<Object> dlm;
+	private JScrollPane scrollPane;
 
 	/**
 	 * Launch the application.
@@ -75,16 +80,23 @@ public class GUI {
 		
 		JMenuItem mntmIndexFiles = new JMenuItem("Index Files");
 		mntmIndexFiles.addActionListener(e -> {
-			// TODO: add in the code to allow the user to index files
-			// JFileChooser?
+			dlm.removeAllElements();
 			JFileChooser chooser = new JFileChooser();
 			chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 		    int returnVal = chooser.showOpenDialog(frmGroupProject);
 		    if(returnVal == JFileChooser.APPROVE_OPTION) {
-		    	// TODO: change to use the IndexFiles.java functions
-		       System.out.println("You chose to open this file: " + chooser.getSelectedFile().getName());
+		       // get number of files then we can set the maximum value for the progress bar
+		       String[] list = chooser.getSelectedFile().list();
+		       progressBar.setMaximum(list.length);
+		       // lock the search buttons so that they cannot be used whilst the indexing is happening
+		       Thread t = new Thread() {
+		    	   @Override
+		    	   public void run() {
+				       IndexFiles.indexFiles(chooser.getSelectedFile().getName(), progressBar, dlm);
+		    	   }
+		       };
+		       t.start();
 		    }
-			
 		});
 		mnFile.add(mntmIndexFiles);
 		
@@ -114,12 +126,12 @@ public class GUI {
 		frmGroupProject.getContentPane().add(panel);
 		panel.setLayout(null);
 		
-		JScrollPane scrollPane = new JScrollPane();
+		scrollPane = new JScrollPane();
 		scrollPane.setBounds(6, 6, 902, 243);
 		panel.add(scrollPane);
 		
-		JList<Object> list = new JList<Object>();
-		DefaultListModel<Object> dlm = new DefaultListModel<Object>();
+		list = new JList<Object>();
+		dlm = new DefaultListModel<Object>();
 		list.setModel(dlm);
 		scrollPane.setViewportView(list);
 		
@@ -131,11 +143,11 @@ public class GUI {
 		lblResultsNumber.setBounds(395, 261, 295, 16);
 		panel.add(lblResultsNumber);
 		
-		JProgressBar searchProgressBar = new JProgressBar();
-		searchProgressBar.setBounds(726, 257, 182, 20);
-		searchProgressBar.setMinimum(0);
-		searchProgressBar.setStringPainted(true);
-		panel.add(searchProgressBar);
+		progressBar = new JProgressBar();
+		progressBar.setBounds(726, 257, 182, 20);
+		progressBar.setMinimum(0);
+		progressBar.setStringPainted(true);
+		panel.add(progressBar);
 		// End of results panel setup
 		
 		// Start of tabbed pane setup
@@ -154,7 +166,7 @@ public class GUI {
 		simpleTab.add(searchTextField);
 		searchTextField.setColumns(10);
 		
-		JButton btnSimpleSearch = new JButton("Search");
+		btnSimpleSearch = new JButton("Search");
 		btnSimpleSearch.addActionListener(e -> {
 			dlm.removeAllElements();
 			Thread t = new Thread() {
@@ -166,17 +178,17 @@ public class GUI {
 					lblQuery.setText("Searched for: " + query); // update the searched for label
 					lblResultsNumber.setText("Calculating...");
 					File[] files = root.listFiles();
-					searchProgressBar.setMaximum(files.length);
+					progressBar.setMaximum(files.length);
 					for (int i = 0; i < files.length; i++) {
 						try {
 							dlm.addElement(SearchFiles.tokenisingTheUserInput(query, files[i].getPath()));
 						} catch (Exception e) {
 							e.printStackTrace();
 						}
-						searchProgressBar.setValue(i); // update the progress bar after every document
+						progressBar.setValue(i); // update the progress bar after every document
 					}
 					long endTime = System.currentTimeMillis();
-					searchProgressBar.setValue(searchProgressBar.getMaximum()); // set progress bar to complete
+					progressBar.setValue(progressBar.getMaximum()); // set progress bar to complete
 					lblResultsNumber.setText(dlm.size() + " results in " + ((endTime - startTime)/1000) + " seconds"); // update the number of hits label
 				}
 			};
@@ -249,7 +261,7 @@ public class GUI {
 		advancedTab.add(numbersToTextfield);
 		numbersToTextfield.setColumns(10);
 		
-		JButton btnAdvancedSearch = new JButton("Search");
+		btnAdvancedSearch = new JButton("Search");
 		btnAdvancedSearch.setBounds(0, 168, 117, 29);
 		btnAdvancedSearch.addActionListener(e -> {
 			dlm.removeAllElements();
@@ -269,7 +281,6 @@ public class GUI {
 					String noneWords = noneWordsTextfield.getText();
 					
 					// numbers ranging from _ to _ 
-					// numbersFromTextField.getText(), numbersToTextField.getText()
 					int numFrom = 0;
 					int numTo = 0;
 					boolean doSearch = true;

@@ -25,6 +25,9 @@ import java.io.InputStreamReader;
 import java.nio.file.FileSystems;
 import java.util.Date;
 
+import javax.swing.DefaultListModel;
+import javax.swing.JProgressBar;
+
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
@@ -106,7 +109,7 @@ public class IndexFiles {
       // iwc.setRAMBufferSizeMB(256.0);
 
       IndexWriter writer = new IndexWriter(dir, iwc);
-      indexDocs(writer, docDir);
+      indexDocs(writer, docDir, null,0, null);
 
       // NOTE: if you want to maximize search performance,
       // you can optionally call forceMerge here.  This can be
@@ -119,6 +122,7 @@ public class IndexFiles {
       writer.close();
 
       Date end = new Date();
+      
       System.out.println(end.getTime() - start.getTime() + " total milliseconds");
 
     } catch (IOException e) {
@@ -142,7 +146,7 @@ public class IndexFiles {
    * @param file The file to index, or the directory to recurse into to find files to index
    * @throws IOException If there is a low-level I/O error
    */
-  static void indexDocs(IndexWriter writer, File file)
+  static void indexDocs(IndexWriter writer, File file, JProgressBar progress, int progressNum, DefaultListModel<Object> dlm)
     throws IOException {
     // do not try to index files that cannot be read
     if (file.canRead()) {
@@ -151,7 +155,7 @@ public class IndexFiles {
         // an IO error could occur
         if (files != null) {
           for (int i = 0; i < files.length; i++) {
-            indexDocs(writer, new File(file, files[i]));
+            indexDocs(writer, new File(file, files[i]), progress, i, dlm);
           }
         }
       } else {
@@ -193,15 +197,23 @@ public class IndexFiles {
           doc.add(new TextField("contents", new BufferedReader(new InputStreamReader(fis, "UTF-8"))));
 
           if (writer.getConfig().getOpenMode() == OpenMode.CREATE) {
-            // New index, so we just add the document (no old document can be there):
-            System.out.println("adding " + file);
-            writer.addDocument(doc);
+              // New index, so we just add the document (no old document can be there):
+              //System.out.println("adding " + file); // TODO: make this print the GUI
+        	  if (dlm != null) {
+        		  dlm.addElement("Adding: " + file);
+        	  }
+              writer.addDocument(doc);
           } else {
-            // Existing index (an old copy of this document may have been indexed) so 
-            // we use updateDocument instead to replace the old one matching the exact 
-            // path, if present:
-            System.out.println("updating " + file);
-            writer.updateDocument(new Term("path", file.getPath()), doc);
+              // Existing index (an old copy of this document may have been indexed) so 
+              // we use updateDocument instead to replace the old one matching the exact 
+              // path, if present:
+              System.out.println("updating " + file);
+              writer.updateDocument(new Term("path", file.getPath()), doc);
+          }
+          
+          // update the progress bar here
+          if (progress != null) {
+        	  progress.setValue(progressNum);
           }
           
         } finally {
@@ -209,6 +221,59 @@ public class IndexFiles {
         }
       }
     }
+  }
+  
+  
+  public static void indexFiles(String docsPath, JProgressBar progress, DefaultListModel<Object> dlm) {
+	  String indexPath = "index";
+	    boolean create = true;
+
+	    if (docsPath == null) {
+	      System.err.println("Bad path for docs");
+	      System.exit(1);
+	    }
+
+	    final File docDir = new File(docsPath);
+	    if (!docDir.exists() || !docDir.canRead()) {
+	      System.out.println("Document directory '" +docDir.getAbsolutePath()+ "' does not exist or is not readable, please check the path");
+	      System.exit(1);
+	    }
+	    
+	    Date start = new Date();
+	    try {
+	      System.out.println("Indexing to directory '" + indexPath + "'...");
+
+
+	      Directory dir = FSDirectory.open(FileSystems.getDefault().getPath(indexPath));
+	      Analyzer analyzer = new StandardAnalyzer();
+	      IndexWriterConfig iwc = new IndexWriterConfig(analyzer);
+
+	      if (create) {
+	        // Create a new index in the directory, removing any
+	        // previously indexed documents:
+	        iwc.setOpenMode(OpenMode.CREATE);
+	      } else {
+	        // Add new documents to an existing index:
+	        iwc.setOpenMode(OpenMode.CREATE_OR_APPEND);
+	      }
+
+	      IndexWriter writer = new IndexWriter(dir, iwc);
+	      indexDocs(writer, docDir, progress, 0, dlm);
+
+	      writer.close();
+
+	      Date end = new Date();
+	      //System.out.println(end.getTime() - start.getTime() + " total milliseconds"); // TODO: make this print to the GUI
+	      if (dlm != null) {
+		      dlm.addElement(end.getTime() - start.getTime() + " total milliseconds");
+	      }
+	      progress.setValue(progress.getMaximum()); // update the progress bar to 100%
+
+	    } catch (IOException e) {
+	      System.out.println(" caught a " + e.getClass() +
+	       "\n with message: " + e.getMessage());
+	    }
+	  
   }
 }
 

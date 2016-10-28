@@ -358,7 +358,6 @@ public class SearchFiles {
 	}
 
 	private static boolean doesNotHitAStopWord(String queryWord) {
-		// TODO Auto-generated method stub
 		for (int i = 0; i < stopWords.size(); i++) {
 			if (queryWord.equals(stopWords.get(i)))
 				;
