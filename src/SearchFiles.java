@@ -54,9 +54,9 @@ public class SearchFiles {
 
 	/** Simple command-line based search demo. */
 	public static void main(String[] args) throws Exception {
-		
+
 		initialiseArrays();
-		
+
 		String usage = "Usage:\tjava org.apache.lucene.demo.SearchFiles [-index dir] [-field f] [-repeat n] [-queries file] [-query string] [-raw] [-paging hitsPerPage]\n\nSee http://lucene.apache.org/java/4_0/demo.html for details.";
 		if (args.length > 0 && ("-h".equals(args[0]) || "-help".equals(args[0]))) {
 			System.out.println(usage);
@@ -223,7 +223,11 @@ public class SearchFiles {
 				Document doc = searcher.doc(hits[i].doc);
 				String path = doc.get("path");
 				if (path != null) {
-					System.out.println((i + 1) + ". " + path + tokenisingTheUserInput(line1, path, false)); // default not to remove duplicates
+					System.out.println((i + 1) + ". " + path + tokenisingTheUserInput(line1, path, false)); // default
+																											// not
+																											// to
+																											// remove
+																											// duplicates
 
 					String title = doc.get("title");
 					if (title != null) {
@@ -292,13 +296,12 @@ public class SearchFiles {
 			}
 		}
 
-		
 		String trueQuery = "";
 		for (int i = 0; i < wordArrayList.size(); i++) {
 			trueQuery += wordArrayList.get(i) + " ";
 		}
 
-	    //System.out.println("true query = " + trueQuery);
+		// System.out.println("true query = " + trueQuery);
 
 		StringTokenizer defaultTokenizer = new StringTokenizer(trueQuery);
 		int size = defaultTokenizer.countTokens();
@@ -330,8 +333,8 @@ public class SearchFiles {
 		return wordHitsWithPath;
 	}
 
-	public static String[][] cleanTheArray(String[][] table){
-		
+	public static String[][] cleanTheArray(String[][] table) {
+
 		for (int p = 0; p < table.length; p++) {
 			int countOfDuplicate = 0;
 			for (int j = 0; j < table.length; j++) {
@@ -339,50 +342,52 @@ public class SearchFiles {
 				String stringAgainstArray = table[p][0];
 				String stringFromArray = table[j][0];
 
-				
-				if(stringAgainstArray.equals(stringFromArray)){
+				if (stringAgainstArray.equals(stringFromArray)) {
 
 					countOfDuplicate++;
-					if (countOfDuplicate == 2){
+					if (countOfDuplicate == 2) {
 						table[p][0] = "null";
 						table[p][1] = "0";
 					}
-					
-					}
-				}
-				
-			}
-		return table;
-		}
 
-	
+				}
+			}
+
+		}
+		return table;
+	}
+
 	private static String[][] searchingThroughDocForWordHits(String queryWord, String path, int size, String[][] table,
 			int i) throws FileNotFoundException {
-		
+
 		Scanner in = new Scanner(new File(path));
+
+		if((queryWord.charAt(queryWord.length() - 1) != 'y')){
+			PorterStemmer stemmer = new PorterStemmer();
+			stemmer.setCurrent(queryWord);
+			stemmer.stem();
+			queryWord = stemmer.getCurrent();
+		}
 		
-		PorterStemmer stemmer = new PorterStemmer();
-		stemmer.setCurrent(queryWord);
-		stemmer.stem();
-		//queryWord = stemmer.getCurrent();
-		
-		//System.out.println("this is resulting from queryWord = " + queryWord); // TODO: this needs fixed, some words ending in 'y' get screwed up. (funny -> funni)
+
+		// System.out.println("this is resulting from queryWord = " +
+		// queryWord); // TODO: this needs fixed, some words ending in 'y' get
+		// screwed up. (funny -> funni)
 
 		while (in.hasNext()) {
 			String s = in.next(); // get the next token in the file
 			table[i][0] = queryWord;
 			if (queryWord.equals(s.toString())) {
 
-				//table[i][0] = queryWord;
+				// table[i][0] = queryWord;
 				int count = Integer.parseInt(table[i][1]);
 
 				count++;
 				table[i][1] = String.valueOf(count);
-				
 
 			}
 		}
-		
+
 		in.close(); // close the scanner
 
 		return table;
@@ -391,8 +396,7 @@ public class SearchFiles {
 
 	private static boolean doesNotHitAStopWord(String queryWord) {
 		for (int i = 0; i < stopWords.size(); i++) {
-			if (queryWord.equals(stopWords.get(i)))
-				;
+			if (queryWord.equals(stopWords.get(i)));
 			System.out.println("you hit a stop word dude---" + queryWord + "" + stopWords.get(i));
 			return false;
 		}
