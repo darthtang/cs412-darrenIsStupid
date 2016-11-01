@@ -326,7 +326,8 @@ public class SearchFiles {
 			cleanTheArray(table);
 		}
 		String wordHits = Arrays.deepToString(table);
-		return wordHits;
+		String wordHitsWithPath = "The path is: " + path + " . The words hit are:" + wordHits;
+		return wordHitsWithPath;
 	}
 
 	public static String[][] cleanTheArray(String[][] table){
