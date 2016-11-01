@@ -373,11 +373,13 @@ public class SearchFiles {
 		Scanner in = new Scanner(new File(path));
 
 		if((queryWord.charAt(queryWord.length() - 1) != 'y')){
+			if((queryWord.charAt(queryWord.length() - 1) != 'e')){
 			PorterStemmer stemmer = new PorterStemmer();
 			stemmer.setCurrent(queryWord);
 			stemmer.stem();
 			queryWord = stemmer.getCurrent();
 		}
+	}
 		
 
 		// System.out.println("this is resulting from queryWord = " +
