@@ -329,9 +329,19 @@ public class SearchFiles {
 			cleanTheArray(table);
 		}
 		String wordHits = Arrays.deepToString(table);
-		String wordHitsWithPath = "The path is: " + path + " . The words hit are:" + wordHits;
+		
+		String nullsRemoved = removingNulls(wordHits);
+		
+		String wordHitsWithPath = "The path is: " + path + " . The words hit are:" + nullsRemoved;
 		return wordHitsWithPath;
 	}
+
+	private static String removingNulls(String wordHits) {
+		
+		String content = wordHits.replace("[null, 0],", "");
+		
+		return content;
+	};
 
 	public static String[][] cleanTheArray(String[][] table) {
 
