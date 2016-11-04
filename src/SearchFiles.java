@@ -111,7 +111,6 @@ public class SearchFiles {
 		}
 
 		QueryParser parser = new QueryParser(field, analyzer);
-		range();
 		while (true) {
 			if (queries == null && queryString == null) { // prompt the user
 				System.out.println("Enter query: ");
