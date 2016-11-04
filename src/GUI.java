@@ -1,5 +1,6 @@
 import java.awt.EventQueue;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import javax.swing.Box;
@@ -35,7 +36,7 @@ public class GUI {
 	private JButton btnSimpleSearch, btnAdvancedSearch;
 	private JList<Object> list; // list of search results
 	private DefaultListModel<Object> dlm;
-	private final String DEFAULT_SEARCH_SPACE = "wsj-1990";
+	private final String DEFAULT_SEARCH_SPACE = "wsj-1990"; // set the default search space
 	private String searchSpace;
 	private JLabel lblCurrentSearchSpace;
 
@@ -110,16 +111,24 @@ public class GUI {
 		
 		JMenuItem mntmChangeSearchSpace = new JMenuItem("Change Search Space");
 		mntmChangeSearchSpace.addActionListener(e -> {
-			// TODO: Test this feature...
 			JFileChooser chooser = new JFileChooser();
 			chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 			int returnVal = chooser.showOpenDialog(frmGroupProject);
 			if (returnVal == JFileChooser.APPROVE_OPTION) {
 				this.searchSpace = chooser.getSelectedFile().getPath();
-				lblCurrentSearchSpace.setText("Current Search Space: " + this.searchSpace);
+				lblCurrentSearchSpace.setText("Current Search Space: \'" + this.searchSpace + "\'");
 			}
 		});
 		mnFile.add(mntmChangeSearchSpace);
+		mnFile.add(new JSeparator());
+		
+		JMenuItem mntmResetSearchSpace = new JMenuItem("Reset Search Space");
+		mntmResetSearchSpace.addActionListener(e -> {
+			// TODO: add in a popup asking the user to confirm the reset action
+			this.searchSpace = DEFAULT_SEARCH_SPACE;
+			lblCurrentSearchSpace.setText("Current search space: \'" + this.searchSpace + "\'");
+		});
+		mnFile.add(mntmResetSearchSpace);
 		
 		mnFile.add(new JSeparator());
 		JMenuItem mntmQuit = new JMenuItem("Quit");
@@ -142,7 +151,7 @@ public class GUI {
 		mnHelp.add(mntmAbout);
 		
 		menuBar.add(Box.createHorizontalGlue()); // move the search space string to the right side
-		lblCurrentSearchSpace = new JLabel("Current Search Space: " + this.searchSpace);
+		lblCurrentSearchSpace = new JLabel("Current Search Space: \'" + this.searchSpace + "\'");
 		menuBar.add(lblCurrentSearchSpace);
 		// End of Menu Items
 		
@@ -156,7 +165,7 @@ public class GUI {
 		scrollPane.setBounds(6, 6, 902, 243);
 		panel.add(scrollPane);
 		
-		list = new JList<Object>();
+		list = new JList<Object>(); // TODO: allow the JList to be double clicked to open the document you clicked on
 		dlm = new DefaultListModel<Object>();
 		list.setModel(dlm);
 		scrollPane.setViewportView(list);
@@ -212,6 +221,7 @@ public class GUI {
 					for (int i = 0; i < files.length; i++) {
 						try {
 							dlm.addElement(SearchFiles.tokenisingTheUserInput(query, files[i].getPath(), chckbxRemoveRepeatingWordsSimple.isSelected()));
+							// TODO: change above to use the GUIobject class variables.
 						} catch (Exception e) {
 							e.printStackTrace();
 						}
@@ -304,40 +314,90 @@ public class GUI {
 				@Override
 				public void run() {
 					// all of these words
-					String allWords = allWordsTextfield.getText();
+					String allWords = allWordsTextfield.getText().trim();
 					
 					// exact words or phrase
-					String exactWords = exactWordsTextfield.getText();
+					String exactWords = exactWordsTextfield.getText().trim();
 					
 					// any of these words
-					String anyWords = anyWordsTextfield.getText();
+					String anyWords = anyWordsTextfield.getText().trim();
 					
 					// none of these words
-					String noneWords = noneWordsTextfield.getText();
+					String noneWords = noneWordsTextfield.getText().trim();
 					
-					// numbers ranging from _ to _ 
-					int numFrom = 0;
-					int numTo = 0;
 					boolean doSearch = true;
-					try {
-						numFrom = Integer.parseInt(numbersFromTextfield.getText());
-						numTo = Integer.parseInt(numbersToTextfield.getText());
-					} catch (NumberFormatException e) {
-						// Throw a popup alerting the user they input bad values
-						JOptionPane.showMessageDialog(null, "Enter numbers only in: \n[Numbers ranging from.. to...] fields", "Error", JOptionPane.ERROR_MESSAGE);
-						doSearch = false;
+					
+					// check which of the textfields we want to use for advanced search
+					String[] list = {allWords, exactWords, anyWords, noneWords};
+					int index = -1;
+					for (int i = 0; i < list.length; i++) {
+						if (!list[i].equals("")) {
+							index = i;
+							break;
+						}
+ 					}
+					int numFrom = -1;
+					int numTo = -1;
+					if (index < 0) {
+						// check the number fields. numbers ranging from _ to _ 
+						try {
+							numFrom = Integer.parseInt(numbersFromTextfield.getText().trim());
+							numTo = Integer.parseInt(numbersToTextfield.getText().trim());
+							index = 4; // indicates to use the number fields
+						} catch (NumberFormatException e) {
+							// Throw a popup alerting the user they input bad values
+							JOptionPane.showMessageDialog(null, "Enter numbers only in: \n[Numbers ranging from.. to...] fields", "Error", JOptionPane.ERROR_MESSAGE);
+							doSearch = false;
+						}
 					}
 					
 					if (doSearch) {
-						SearchFiles.doAdvancedSearch(allWords, exactWords, anyWords, noneWords, numFrom, numTo, chckbxRemoveRepeatingWordsAdv.isSelected());
+						long startTime = System.currentTimeMillis();
+						if (index == 4) {
+							lblQuery.setText("Searched for numbers ranging from " + numFrom + " to " + numTo); // special case for number fields
+						} else {
+							String query = list[index];
+							lblQuery.setText("Searched for: " + query); // update the searched for label
+						}
+						lblResultsNumber.setText("Calculating...");
+						File root = new File(getSearchSpace());
+						File[] files = root.listFiles();
+						progressBar.setMaximum(files.length);
+						for (int i = 0; i < files.length; i++) {
+							// do the search for each file
+							switch (index) {
+							case 0:
+								dlm.addElement(SearchFiles.advancedAllWords(list[index], files[i].getPath()));
+								break;
+							case 1:
+								try {
+									dlm.addElement(SearchFiles.advancedExactWords(list[index], files[i].getPath()));
+								} catch (FileNotFoundException e) {}
+								break;
+							case 2: 
+								dlm.addElement(SearchFiles.advancedAnyWords(list[index], files[i].getPath()));
+								break;
+							case 3: 
+								dlm.addElement(SearchFiles.advancedNoneWords(list[index], files[i].getPath()));
+								break;
+							case 4:
+								try {
+									dlm.addElement(SearchFiles.advancedRange(numFrom, numTo, files[i].getPath()));
+								} catch (Exception e) {}
+							}
+							progressBar.setValue(i); // update the progress bar after every document
+						}
+						long endTime = System.currentTimeMillis();
+						progressBar.setValue(progressBar.getMaximum()); // set progress bar to complete
+						lblResultsNumber.setText(dlm.size() + " results in " + ((endTime - startTime)/1000) + " seconds"); // update the number of hits label
+						
+						// TODO: try to disable simple/advanced search buttons until current search is complete. Could maybe make a new thread that checks progress bar every now and then for max value
 					}
 				}
 			};
 			t.start(); // start the thread to search the files
 		});
 		advancedTab.add(btnAdvancedSearch);
-		
-		
 		// End of advanced tab setup
 
 		// Start of preferences tab setup
@@ -350,20 +410,33 @@ public class GUI {
 		preferencesTab.add(lblTempPrefTabLabel);
 		// End of preferences tab setup
 	}
-	
+		
 	private String getSearchSpace() {
 		return searchSpace;
 	}
 	
 	private String getUserGuide() {
-		return ""; // TODO: write the user guide
+		// TODO: write the user guide
+		return "Searching\n\n"
+				+ "You can search documents by using either the Simple or Advanced Search tab.\n"
+				+ "- Simple Search allows you to enter a simple query.\n"
+				+ "- Advanced Search allows you to customise your search using a combination of the given text fields.\n"
+				+ "Results will be displayed in the box at the bottom of the application\n\n\n"
+				+ "Indexing\n\n"
+				+ "You can index files using the File -> Index Files menu option.\n"
+				+ "Navigate your way to the desired folder in your file system and press ok.\n"
+				+ "The files that are being indexed will be shown in the box at the bottom of the application.\n\n\n"
+				+ "Changing the Search Space\n\n"
+				+ "You can change which folder you want to search through using the File -> Change Search Space menu option.\n"
+				+ "Navigate your way to the desired folder in your system and press ok.\n"
+				+ "You should see the current search space at the top right corner of the application indicate the change.";
 	}
 	
 	private String getAbout() {
-		return "Authors: "
-				+ "\n Kieran Sharpe"
-				+ "\n Darren Tang"
-				+ "\n Omer Shah"
-				+ "\n Dave Stirrat";
+		return "Authors:"
+				+ "\n- Kieran Sharpe"
+				+ "\n- Darren Tang"
+				+ "\n- Omer Shah"
+				+ "\n- Dave Stirrat";
 	}
 }

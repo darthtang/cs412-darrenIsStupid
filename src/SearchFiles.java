@@ -27,6 +27,7 @@ import java.nio.file.FileSystems;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 import java.util.StringTokenizer;
 
@@ -383,10 +384,6 @@ public class SearchFiles {
 			queryWord = stemmer.getCurrent();
 		}
 
-		// System.out.println("this is resulting from queryWord = " +
-		// queryWord); // TODO: this needs fixed, some words ending in 'y' get
-		// screwed up. (funny -> funni)
-
 		while (in.hasNext()) {
 			String s = in.next(); // get the next token in the file
 			table[i][0] = queryWord;
@@ -418,50 +415,54 @@ public class SearchFiles {
 		return true;
 	}
 
-	public static String advancedAllWords(String allWords, String Path) {
+	public static String advancedAllWords(String allWords, String path) {
 		// wsj-1990/WSJ_0827
 		return "";
 	}
 
-	public static void advancedExactWords() throws FileNotFoundException {
-		String path = "wsj-1990/WSJ_0827";
-		Scanner scanner = new Scanner(new File(path));
-		String text = scanner.useDelimiter("\\A").next();
-		scanner.close();
+	public static String advancedExactWords(String exactWords, String path) throws FileNotFoundException {
+		//String path = "wsj-1990/WSJ_0827";
+		String text;
+		try {
+			Scanner scanner = new Scanner(new File(path));
+			text = scanner.useDelimiter("\\A").next();
+			scanner.close();
+		} catch (NoSuchElementException e) { return null; }
+		
 
-		String exactWords = "But such funds need far more oversight than they're";
+		//String exactWords = "But such funds need far more oversight than they're";
 
 		if (text.contains(exactWords)) {
-			System.out.println("found it");
-			return;
+			//System.out.println("found it");
+			return path + ": found it";
 		} else {
 			System.out.println("not found it");
-			return;
+			return path + ": didn't find it";
 		}
 	}
 
-	public static String advancedAnyWords(String anyWords, String Path) {
+	public static String advancedAnyWords(String anyWords, String path) {
 
 		return "";
 	}
 
-	public static String advancedNoneWords(String noneWords, String Path) {
+	public static String advancedNoneWords(String noneWords, String path) {
 
 		return "";
 	}
 
-	public static void range() throws Exception {
-		int fromRange = 10;
-		int toRange = 30;
+	public static String advancedRange(int fromRange, int toRange, String path) throws Exception {
+		//int fromRange = 10;
+		//int toRange = 30;
 		String theStringPassedToSearchingMethod = "";
 		
 		for (int i = fromRange; i <= toRange; i++) {
 			theStringPassedToSearchingMethod = theStringPassedToSearchingMethod + " "+Integer.toString(i);
 		}
 		//String query, String path, boolean removeDuplicates
-		String path = "wsj-1990/WSJ_0827";
-		System.out.println(tokenisingTheUserInput(theStringPassedToSearchingMethod,path,false));
-		
+		//String path = "wsj-1990/WSJ_0827";
+		//System.out.println(tokenisingTheUserInput(theStringPassedToSearchingMethod,path,false));
+		return tokenisingTheUserInput(theStringPassedToSearchingMethod, path, false);
 	}
 
 }
