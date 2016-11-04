@@ -2,6 +2,7 @@ import java.awt.EventQueue;
 import java.io.File;
 import java.io.IOException;
 
+import javax.swing.Box;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -16,24 +17,27 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 
 public class GUI {
 
 	private JFrame frmGroupProject;
-	private JTextField searchTextField;
-	private JTextField allWordsTextfield;
+	private JTextField searchTextField; // simple search
+	private JTextField allWordsTextfield; // advanced search
 	private JTextField exactWordsTextfield;
 	private JTextField anyWordsTextfield;
 	private JTextField noneWordsTextfield;
 	private JTextField numbersFromTextfield;
-	private JTextField numbersToTextfield;
+	private JTextField numbersToTextfield; // end of advanced search
 	private JProgressBar progressBar;
 	private JButton btnSimpleSearch, btnAdvancedSearch;
-	private JList<Object> list;
+	private JList<Object> list; // list of search results
 	private DefaultListModel<Object> dlm;
-	private JScrollPane scrollPane;
+	private final String DEFAULT_SEARCH_SPACE = "wsj-1990";
+	private String searchSpace;
+	private JLabel lblCurrentSearchSpace;
 
 	/**
 	 * Launch the application.
@@ -65,6 +69,9 @@ public class GUI {
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
+		// initialise search space to default
+		searchSpace = DEFAULT_SEARCH_SPACE;
+		
 		frmGroupProject = new JFrame();
 		frmGroupProject.setResizable(false);
 		frmGroupProject.setTitle("412 Group Project");
@@ -90,7 +97,6 @@ public class GUI {
 		       // get number of files then we can set the maximum value for the progress bar
 		       String[] list = chooser.getSelectedFile().list();
 		       progressBar.setMaximum(list.length);
-		       // lock the search buttons so that they cannot be used whilst the indexing is happening
 		       Thread t = new Thread() {
 		    	   @Override
 		    	   public void run() {
@@ -102,6 +108,20 @@ public class GUI {
 		});
 		mnFile.add(mntmIndexFiles);
 		
+		JMenuItem mntmChangeSearchSpace = new JMenuItem("Change Search Space");
+		mntmChangeSearchSpace.addActionListener(e -> {
+			// TODO: Test this feature...
+			JFileChooser chooser = new JFileChooser();
+			chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+			int returnVal = chooser.showOpenDialog(frmGroupProject);
+			if (returnVal == JFileChooser.APPROVE_OPTION) {
+				this.searchSpace = chooser.getSelectedFile().getPath();
+				lblCurrentSearchSpace.setText("Current Search Space: " + this.searchSpace);
+			}
+		});
+		mnFile.add(mntmChangeSearchSpace);
+		
+		mnFile.add(new JSeparator());
 		JMenuItem mntmQuit = new JMenuItem("Quit");
 		mntmQuit.addActionListener(e -> System.exit(0));
 		mnFile.add(mntmQuit);
@@ -111,17 +131,19 @@ public class GUI {
 		
 		JMenuItem mntmUserGuide = new JMenuItem("User Guide");
 		mntmUserGuide.addActionListener(e -> {
-			// TODO: add in the code to show a popup detailing the user guide
 			JOptionPane.showMessageDialog(null, getUserGuide(), "User Guide", JOptionPane.INFORMATION_MESSAGE);
 		});
 		mnHelp.add(mntmUserGuide);
 		
 		JMenuItem mntmAbout = new JMenuItem("About");
 		mntmAbout.addActionListener(e -> {
-			// TODO: add in the code to show a popup detailing the authors of the program
 			JOptionPane.showMessageDialog(null, getAbout(), "About", JOptionPane.INFORMATION_MESSAGE);
 		});
 		mnHelp.add(mntmAbout);
+		
+		menuBar.add(Box.createHorizontalGlue()); // move the search space string to the right side
+		lblCurrentSearchSpace = new JLabel("Current Search Space: " + this.searchSpace);
+		menuBar.add(lblCurrentSearchSpace);
 		// End of Menu Items
 		
 		// Start of results panel setup
@@ -130,7 +152,7 @@ public class GUI {
 		frmGroupProject.getContentPane().add(panel);
 		panel.setLayout(null);
 		
-		scrollPane = new JScrollPane();
+		JScrollPane scrollPane = new JScrollPane();
 		scrollPane.setBounds(6, 6, 902, 243);
 		panel.add(scrollPane);
 		
@@ -181,7 +203,7 @@ public class GUI {
 				@Override
 				public void run() {
 					long startTime = System.currentTimeMillis();
-					File root = new File("wsj-1990"); // TODO: remove hard coded value
+					File root = new File(getSearchSpace());
 					String query = searchTextField.getText().trim();
 					lblQuery.setText("Searched for: " + query); // update the searched for label
 					lblResultsNumber.setText("Calculating...");
@@ -329,8 +351,12 @@ public class GUI {
 		// End of preferences tab setup
 	}
 	
+	private String getSearchSpace() {
+		return searchSpace;
+	}
+	
 	private String getUserGuide() {
-		return "";
+		return ""; // TODO: write the user guide
 	}
 	
 	private String getAbout() {
