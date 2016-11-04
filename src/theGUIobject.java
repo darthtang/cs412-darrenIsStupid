@@ -16,6 +16,4 @@ public class theGUIobject {
 	        firstTenWordsOfTextTag = tenWords;
 	        
 	    }
-	
-	
 }

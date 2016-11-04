@@ -414,8 +414,24 @@ public class SearchFiles {
 		return true;
 	}
 
-	public static String doAdvancedSearch(String allWords, String exactWords, String anyWords, String noneWords,
-			int fromRange, int toRange, boolean removeDuplicates) {
+	public static String advancedAllWords(String allWords) {
+		
+		return "";
+	}
+	public static String advancedExactWords(String exactWords) {
+		
+		return "";
+	}
+	public static String advancedAnyWords(String anyWords, String Path) {
+		
+		return "";
+	}
+	public static String advancedNoneWords(String noneWords, String Path) {
+		
+		return "";
+	}
+	public static String range (int fromRange, int toRange, boolean removeDuplicates, String Path) {
+		
 		return "";
 	}
 
