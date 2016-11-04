@@ -111,6 +111,7 @@ public class SearchFiles {
 		}
 
 		QueryParser parser = new QueryParser(field, analyzer);
+		range();
 		while (true) {
 			if (queries == null && queryString == null) { // prompt the user
 				System.out.println("Enter query: ");
@@ -138,7 +139,6 @@ public class SearchFiles {
 				Date end = new Date();
 				System.out.println("Time: " + (end.getTime() - start.getTime()) + "ms");
 			}
-
 			doPagingSearch(in, searcher, query, hitsPerPage, raw, queries == null && queryString == null, line);
 
 			if (queryString != null) {
@@ -292,6 +292,7 @@ public class SearchFiles {
 			if (!stopWords.contains(word)) {
 				if (!userAddedstopWords.contains(word)) {
 					wordArrayList.add(word);
+					//System.out.println("11111111");
 				}
 			}
 		}
@@ -299,6 +300,7 @@ public class SearchFiles {
 		String trueQuery = "";
 		for (int i = 0; i < wordArrayList.size(); i++) {
 			trueQuery += wordArrayList.get(i) + " ";
+			//System.out.println("11111111");
 		}
 
 		// System.out.println("true query = " + trueQuery);
@@ -310,6 +312,7 @@ public class SearchFiles {
 		String[] tokenOfInput = new String[size];
 		for (int t = 0; t < tokenOfInput.length; t++) {
 			tokenOfInput[t] = defaultTokenizer.nextToken();
+			//System.out.println("11111111");
 		}
 
 		// creating 2d array and then set values
@@ -317,6 +320,7 @@ public class SearchFiles {
 		for (int p = 0; p < table.length; p++) {
 			for (int j = 0; j < table[p].length; j++) {
 				table[p][j] = "0";
+				//System.out.println("11111111");
 			}
 		}
 
@@ -329,11 +333,10 @@ public class SearchFiles {
 			cleanTheArray(table);
 		}
 		String wordHits = Arrays.deepToString(table);
-
 		String nullsRemoved = removingNulls(wordHits);
 
 		String wordHitsWithPath = "The path is: " + path + " . The words hit are:" + nullsRemoved;
-		advancedExactWords();
+		//advancedExactWords();
 		return wordHitsWithPath;
 	}
 
@@ -372,7 +375,7 @@ public class SearchFiles {
 			int i) throws FileNotFoundException {
 
 		Scanner in = new Scanner(new File(path));
-		System.out.println(path);
+		//System.out.println(path);
 
 		if (!(queryWord.endsWith("y") || queryWord.endsWith("e"))) {
 			PorterStemmer stemmer = new PorterStemmer();
@@ -448,9 +451,18 @@ public class SearchFiles {
 		return "";
 	}
 
-	public static String range(int fromRange, int toRange, boolean removeDuplicates, String Path) {
-
-		return "";
+	public static void range() throws Exception {
+		int fromRange = 10;
+		int toRange = 30;
+		String theStringPassedToSearchingMethod = "";
+		
+		for (int i = fromRange; i <= toRange; i++) {
+			theStringPassedToSearchingMethod = theStringPassedToSearchingMethod + " "+Integer.toString(i);
+		}
+		//String query, String path, boolean removeDuplicates
+		String path = "wsj-1990/WSJ_0827";
+		System.out.println(tokenisingTheUserInput(theStringPassedToSearchingMethod,path,false));
+		
 	}
 
 }
