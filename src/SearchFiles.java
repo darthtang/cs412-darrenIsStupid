@@ -329,17 +329,18 @@ public class SearchFiles {
 			cleanTheArray(table);
 		}
 		String wordHits = Arrays.deepToString(table);
-		
+
 		String nullsRemoved = removingNulls(wordHits);
-		
+
 		String wordHitsWithPath = "The path is: " + path + " . The words hit are:" + nullsRemoved;
+		advancedExactWords();
 		return wordHitsWithPath;
 	}
 
 	private static String removingNulls(String wordHits) {
-		
+
 		String content = wordHits.replace("[null, 0],", "");
-		
+
 		return content;
 	};
 
@@ -371,14 +372,14 @@ public class SearchFiles {
 			int i) throws FileNotFoundException {
 
 		Scanner in = new Scanner(new File(path));
-		
+		System.out.println(path);
+
 		if (!(queryWord.endsWith("y") || queryWord.endsWith("e"))) {
 			PorterStemmer stemmer = new PorterStemmer();
 			stemmer.setCurrent(queryWord);
 			stemmer.stem();
 			queryWord = stemmer.getCurrent();
 		}
-		
 
 		// System.out.println("this is resulting from queryWord = " +
 		// queryWord); // TODO: this needs fixed, some words ending in 'y' get
@@ -406,7 +407,8 @@ public class SearchFiles {
 
 	private static boolean doesNotHitAStopWord(String queryWord) {
 		for (int i = 0; i < stopWords.size(); i++) {
-			if (queryWord.equals(stopWords.get(i)));
+			if (queryWord.equals(stopWords.get(i)))
+				;
 			System.out.println("you hit a stop word dude---" + queryWord + "" + stopWords.get(i));
 			return false;
 		}
@@ -414,24 +416,40 @@ public class SearchFiles {
 		return true;
 	}
 
-	public static String advancedAllWords(String allWords) {
-		
+	public static String advancedAllWords(String allWords, String Path) {
+		// wsj-1990/WSJ_0827
 		return "";
 	}
-	public static String advancedExactWords(String exactWords) {
-		
-		return "";
+
+	public static void advancedExactWords() throws FileNotFoundException {
+		String path = "wsj-1990/WSJ_0827";
+		Scanner scanner = new Scanner(new File(path));
+		String text = scanner.useDelimiter("\\A").next();
+		scanner.close();
+
+		String exactWords = "But such funds need far more oversight than they're";
+
+		if (text.contains(exactWords)) {
+			System.out.println("found it");
+			return;
+		} else {
+			System.out.println("not found it");
+			return;
+		}
 	}
+
 	public static String advancedAnyWords(String anyWords, String Path) {
-		
+
 		return "";
 	}
+
 	public static String advancedNoneWords(String noneWords, String Path) {
-		
+
 		return "";
 	}
-	public static String range (int fromRange, int toRange, boolean removeDuplicates, String Path) {
-		
+
+	public static String range(int fromRange, int toRange, boolean removeDuplicates, String Path) {
+
 		return "";
 	}
 
