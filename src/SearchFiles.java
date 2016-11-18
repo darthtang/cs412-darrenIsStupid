@@ -44,11 +44,18 @@ import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.FSDirectory;
 import org.tartarus.snowball.ext.PorterStemmer;
 
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.DocumentBuilder;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.Node;
+import org.w3c.dom.Element;
+
 /** Simple command-line based search demo. */
 public class SearchFiles {
 
 	private static ArrayList<String> stopWords;
 	private static ArrayList<String> userAddedstopWords;
+	private static ArrayList<XMLObject> listOfXMLobjects;
 
 	private SearchFiles() {
 	}
@@ -148,6 +155,45 @@ public class SearchFiles {
 		reader.close();
 	}
 
+	private static void spittingOutXML(String path,ArrayList<String> wordArrayList, String trueQuery, boolean removeDuplicates) {
+		// wsj-1990/WSJ_0827
+
+		try {
+
+			File fXmlFile = new File(path);
+			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+			Node doc = dBuilder.parse(fXmlFile);
+			
+			((org.w3c.dom.Document) doc).getDocumentElement().normalize();
+
+			System.out.println("Root element :" + ((org.w3c.dom.Document) doc).getDocumentElement().getNodeName());
+
+			NodeList nList = ((org.w3c.dom.Document) doc).getElementsByTagName("DOC");
+			for (int temp = 0; temp < nList.getLength(); temp++) {
+
+				Node nNode = nList.item(temp);
+
+				System.out.println("\nCurrent Element :" + nNode.getNodeName());
+
+				if (nNode.getNodeType() == Node.ELEMENT_NODE) {
+
+					Element eElement = (Element) nNode;
+
+					String nameOfObject = eElement.getElementsByTagName("HL").item(0).getTextContent();
+					String overviewOfObject = eElement.getElementsByTagName("LP").item(0).getTextContent();
+					String textOfObject = eElement.getElementsByTagName("TEXT").item(0).getTextContent();
+
+					XMLObject theObject = new XMLObject(nameOfObject, overviewOfObject, textOfObject, path, wordArrayList, trueQuery, removeDuplicates);
+					listOfXMLobjects.add(theObject);
+					
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
 	/**
 	 * This demonstrates a typical paging search scenario, where the search
 	 * engine presents pages of size n to the user. The user can then go to the
@@ -170,6 +216,7 @@ public class SearchFiles {
 
 	public static void initialiseArrays() throws IOException {
 		userAddedstopWords = new ArrayList<String>();
+		listOfXMLobjects = new ArrayList<XMLObject>();
 
 		BufferedReader br = null;
 		stopWords = new ArrayList<String>();
@@ -223,11 +270,13 @@ public class SearchFiles {
 				Document doc = searcher.doc(hits[i].doc);
 				String path = doc.get("path");
 				if (path != null) {
-					System.out.println((i + 1) + ". " + path + tokenisingTheUserInput(line1, path, false)); // default
-																											// not
-																											// to
-																											// remove
-																											// duplicates
+					//spittingOutXML(path);
+					//spittingOutXML("wsj-1990/WSJ_0827");
+					//System.out.println((i + 1) + ". " + path + tokenisingTheUserInput(line1, path, false)); // default
+					// not
+					// to
+					// remove
+					// duplicates
 
 					String title = doc.get("title");
 					if (title != null) {
@@ -285,59 +334,66 @@ public class SearchFiles {
 		}
 	}
 
-	public static String tokenisingTheUserInput(String query, String path, boolean removeDuplicates) throws Exception {
-
+	public static ArrayList<XMLObject> tokenisingTheUserInput(String query, String path, boolean removeDuplicates) throws Exception {
+		
+	
 		ArrayList<String> wordArrayList = new ArrayList<String>();
 		for (String word : query.split(" ")) {
 			if (!stopWords.contains(word)) {
 				if (!userAddedstopWords.contains(word)) {
 					wordArrayList.add(word);
-					//System.out.println("11111111");
+					// System.out.println("11111111");
 				}
 			}
 		}
 
+		
 		String trueQuery = "";
 		for (int i = 0; i < wordArrayList.size(); i++) {
 			trueQuery += wordArrayList.get(i) + " ";
-			//System.out.println("11111111");
+			// System.out.println("11111111");
 		}
 
-		// System.out.println("true query = " + trueQuery);
-
-		StringTokenizer defaultTokenizer = new StringTokenizer(trueQuery);
-		int size = defaultTokenizer.countTokens();
-
-		// create array and then set the values
-		String[] tokenOfInput = new String[size];
-		for (int t = 0; t < tokenOfInput.length; t++) {
-			tokenOfInput[t] = defaultTokenizer.nextToken();
-			//System.out.println("11111111");
-		}
-
-		// creating 2d array and then set values
-		String[][] table = new String[size][2];
-		for (int p = 0; p < table.length; p++) {
-			for (int j = 0; j < table[p].length; j++) {
-				table[p][j] = "0";
-				//System.out.println("11111111");
-			}
-		}
-
-		for (int i = 0; i < table.length; i++) {
-			searchingThroughDocForWordHits(tokenOfInput[i], path, size, table, i);
-		}
+		spittingOutXML(path,wordArrayList,trueQuery,removeDuplicates);
+		
+		return listOfXMLobjects;
+		
+//		// System.out.println("true query = " + trueQuery);
+//
+//		StringTokenizer defaultTokenizer = new StringTokenizer(trueQuery);
+//		int size = defaultTokenizer.countTokens();
+//
+//		// create array and then set the values
+//		String[] tokenOfInput = new String[size];
+//		for (int t = 0; t < tokenOfInput.length; t++) {
+//			tokenOfInput[t] = defaultTokenizer.nextToken();
+//			// System.out.println("11111111");
+//		}
+//
+//		// creating 2d array and then set values
+//		String[][] table = new String[size][2];
+//		for (int p = 0; p < table.length; p++) {
+//			for (int j = 0; j < table[p].length; j++) {
+//				table[p][j] = "0";
+//				// System.out.println("11111111");
+//			}
+//		}
+//
+//		for (int i = 0; i < table.length; i++) {
+//			
+//			searchingThroughDocForWordHits(tokenOfInput[i], path, table, i);
+//		}
 		// System.out.print("The ammount of times the word appear in the
 		// document for the document above " + (Arrays.deepToString(table)));
-		if (removeDuplicates) {
-			cleanTheArray(table);
-		}
-		String wordHits = Arrays.deepToString(table);
-		String nullsRemoved = removingNulls(wordHits);
-
-		String wordHitsWithPath = "The path is: " + path + " . The words hit are:" + nullsRemoved;
-		//advancedExactWords();
-		return wordHitsWithPath;
+//		if (removeDuplicates) {
+//			cleanTheArray(table);
+//		}
+//		String wordHits = Arrays.deepToString(table);
+//		String nullsRemoved = removingNulls(wordHits);
+//
+//		String wordHitsWithPath = "The path is: " + path + " . The words hit are:" + nullsRemoved;
+//		// advancedExactWords();
+		
 	}
 
 	private static String removingNulls(String wordHits) {
@@ -371,11 +427,11 @@ public class SearchFiles {
 		return table;
 	}
 
-	private static String[][] searchingThroughDocForWordHits(String queryWord, String path, int size, String[][] table,
+	private static String[][] searchingThroughDocForWordHits(String queryWord, String path, String[][] table,
 			int i) throws FileNotFoundException {
 
 		Scanner in = new Scanner(new File(path));
-		//System.out.println(path);
+		// System.out.println(path);
 
 		if (!(queryWord.endsWith("y") || queryWord.endsWith("e"))) {
 			PorterStemmer stemmer = new PorterStemmer();
@@ -421,19 +477,21 @@ public class SearchFiles {
 	}
 
 	public static String advancedExactWords(String exactWords, String path) throws FileNotFoundException {
-		//String path = "wsj-1990/WSJ_0827";
+		// String path = "wsj-1990/WSJ_0827";
 		String text;
 		try {
 			Scanner scanner = new Scanner(new File(path));
 			text = scanner.useDelimiter("\\A").next();
 			scanner.close();
-		} catch (NoSuchElementException e) { return null; }
-		
+		} catch (NoSuchElementException e) {
+			return null;
+		}
 
-		//String exactWords = "But such funds need far more oversight than they're";
+		// String exactWords = "But such funds need far more oversight than
+		// they're";
 
 		if (text.contains(exactWords)) {
-			//System.out.println("found it");
+			// System.out.println("found it");
 			return path + ": found it";
 		} else {
 			System.out.println("not found it");
@@ -452,16 +510,16 @@ public class SearchFiles {
 	}
 
 	public static String advancedRange(int fromRange, int toRange, String path) throws Exception {
-		//int fromRange = 10;
-		//int toRange = 30;
+		// int fromRange = 10;
+		// int toRange = 30;
 		String theStringPassedToSearchingMethod = "";
-		
+
 		for (int i = fromRange; i <= toRange; i++) {
-			theStringPassedToSearchingMethod = theStringPassedToSearchingMethod + " "+Integer.toString(i);
+			theStringPassedToSearchingMethod = theStringPassedToSearchingMethod + " " + Integer.toString(i);
 		}
-		//String query, String path, boolean removeDuplicates
-		//String path = "wsj-1990/WSJ_0827";
-		//System.out.println(tokenisingTheUserInput(theStringPassedToSearchingMethod,path,false));
+		// String query, String path, boolean removeDuplicates
+		// String path = "wsj-1990/WSJ_0827";
+		// System.out.println(tokenisingTheUserInput(theStringPassedToSearchingMethod,path,false));
 		return tokenisingTheUserInput(theStringPassedToSearchingMethod, path, false);
 	}
 

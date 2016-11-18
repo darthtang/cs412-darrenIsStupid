@@ -1,3 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
 <DOC>
 <DOCNO>
 WSJ900921-0205
@@ -15689,12 +15691,7 @@ Capital was "a small factor, but nonetheless a factor."
 
  Loss reserves as % of
    nonperforming loans              250%             113%
-                                                                                                       
-
- *Also includes real estate repossessed and not yet sold
-                                                                                                       
-
- Sources: Keefe Bruyette & Woods; General Electric
+                                                                                                              
 </TEXT>
 </DOC>
 <DOC>
@@ -18993,3 +18990,4 @@ named Black Ice.
    (WSJ Sept. 20, 1990)
 </TEXT>
 </DOC>
+</root>
